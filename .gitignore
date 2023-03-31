@@ -1,0 +1,9 @@
+apk.txt
+apk-lock.txt
+*~
+venv/
+megalinter-reports/
+reports/
+.scannerwork
+.travis.yml
+
