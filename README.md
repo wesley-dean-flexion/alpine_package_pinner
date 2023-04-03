@@ -46,3 +46,14 @@ a `class` of `version`) then this script will break.
 ```bash
 xargs apk add < apk-lock.txt 
 ```
+
+## Updating Dockerfiles
+
+The following will retrieve the version of Alpine used in a Dockerfile:
+
+```bash
+sed -Ene 's/[[:space:]]*from[[:space:]]*alpine:([[:digit:]]*.[[:digit:]]*).*/v\1/Ip' < Dockerfile
+```
+
+From there, one may call the package pinner then add and commit the
+updated `apk-lock.txt` file.
