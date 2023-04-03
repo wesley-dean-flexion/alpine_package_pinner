@@ -28,6 +28,11 @@ SCRIPT_PATH="${SCRIPT_PATH:-$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P)}"
 declare LIBRARY_PATH
 LIBRARY_PATH="${LIBRARY_PATH:-${SCRIPT_PATH}/lib/}"
 
+## @var DEFAULT_BRANCH
+## @brief the default package repository branch to query
+declare DEFAULT_BRANCH
+DEFAULT_BRANCH=""
+
 ## @var DEFAULT_INPUT_FILENAME
 ## @brief default file to read
 declare DEFAULT_INPUT_FILENAME
@@ -244,6 +249,7 @@ get_package_version() {
   os_release_filename="${os_release_filename:-/etc/os-release}"
 
   branch="${branch:-$(get_alpine_release os_release_filename="${os_release_filename}")}"
+
   package_name="${package_name?No package name specified}"
   arch="${arch:-$(uname -m)}"
   repo="${repo:-}"
@@ -295,6 +301,7 @@ main() {
   ###
 
 
+  branch="${DEFAULT_BRANCH}"
   input_filename="${DEFAULT_INPUT_FILENAME}"
   output_filename="${DEFAULT_OUTPUT_FILENAME}"
 
@@ -307,6 +314,7 @@ main() {
   for arg in "$@" ; do
     shift
     case "$arg" in
+      '--branch' ) set -- "$@" "-b" ;; ##- see -b
       '--help') set -- "$@" "-h" ;;   ##- see -h
       '--input') set -- "$@" "-i" ;;   ##- see -i
       '--output') set -- "$@" "-o" ;;   ##- see -o
@@ -321,8 +329,9 @@ main() {
 
 
   OPTIND=1
-  while getopts "i:o:h" opt ; do
+  while getopts "b:i:o:h" opt ; do
     case "$opt" in
+      'b' ) branch="$OPTARG" ;;                 ##- set the branch
       'i' ) input_filename="$OPTARG" ;;         ##- set the file to read
       'o' ) output_filename="$OPTARG" ;;        ##- set the file to write
       'h' ) display_usage ; exit 0 ;; ##- view the help documentation

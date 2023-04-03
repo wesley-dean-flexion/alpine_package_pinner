@@ -40,3 +40,9 @@ The Alpine website is queried and `xmllint` is used to parse out
 the results of what would have been a web-submitted query.  If
 the site changes (i.e., if there is no longer a `<td>` tag with
 a `class` of `version`) then this script will break.
+
+## Installing Pinned Packages
+
+```bash
+xargs apk add < apk-lock.txt 
+```
