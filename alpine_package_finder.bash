@@ -21,12 +21,17 @@ set -euo pipefail
 ## @brief path to where the script lives
 declare SCRIPT_PATH
 # shellcheck disable=SC2034
-SCRIPT_PATH="${SCRIPT_PATH:-$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P)}"
+SCRIPT_PATH="${SCRIPT_PATH:-$(cd "$( dirname "${BASH_SOURCE[0]}")"  && pwd -P)}"
 
 ## @var LIBRARY_PATH
 ## @brief location where libraries to be included reside
 declare LIBRARY_PATH
 LIBRARY_PATH="${LIBRARY_PATH:-${SCRIPT_PATH}/lib/}"
+
+## @var DEFAULT_BRANCH
+## @brief the default package repository branch to query
+declare DEFAULT_BRANCH
+DEFAULT_BRANCH=""
 
 ## @var DEFAULT_INPUT_FILENAME
 ## @brief default file to read
@@ -37,7 +42,6 @@ DEFAULT_INPUT_FILENAME="${DEFAULT_INPUT_FILENAME:-apk.txt}"
 ## @brief default file to write
 declare DEFAULT_OUTPUT_FILENAME
 DEFAULT_OUTPUT_FILENAME="${DEFAULT_OUTPUT_FILENAME:-apk-lock.txt}"
-
 
 ## @fn die
 ## @brief receive a trapped error and display helpful debugging details
@@ -58,14 +62,13 @@ die() {
   local FRAMES=${#BASH_LINENO[@]}
 
   # FRAMES-2 skips main, the last one in arrays
-  for ((i=FRAMES - 2; i >= 0; i--)); do
+  for ((i = FRAMES - 2; i >= 0; i--)); do
     printf "  File \"%s\", line %s, in %s\n" "${BASH_SOURCE[i + 1]}" "${BASH_LINENO[i]}" "${FUNCNAME[i + 1]}"
     # Grab the source code of the line
     sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i + 1]}"
   done
   exit 1
 }
-
 
 ## @fn display_usage
 ## @brief display some auto-generated usage information
@@ -93,7 +96,7 @@ die() {
 ##
 ## while getopts "w:h" option ; do
 ##   case "$option" in
-##     w ) word="$OPTARG" ;; ##- set the word value 
+##     w ) word="$OPTARG" ;; ##- set the word value
 ##     h ) display_usage ; exit 0 ;;
 ##     * ) printf "Invalid option '%s'" "$option" 2>&1 ; display_usage 1>&2 ; exit 1 ;;
 ##   esac
@@ -108,20 +111,20 @@ display_usage() {
 
   local usage
   usage="$(
-  (
-    sed -Ene "s/^[[:space:]]*(['\"])([[:alnum:]]*)\1[[:space:]]*\).*##-[[:space:]]*(.*)/\-\2\t\t: \3/p" < "$0"
-    sed -Ene "s/^[[:space:]]*(['\"])([-[:alnum:]]*)*\1[[:space:]]*\)[[:space:]]*set[[:space:]]*--[[:space:]]*(['\"])[@$]*\3[[:space:]]*(['\"])(-[[:alnum:]])\4.*##-[[:space:]]*(.*)/\2\t\t: \6/p" < "$0"
-  ) | sort --ignore-case)"
+    ( 
+      sed -Ene "s/^[[:space:]]*(['\"])([[:alnum:]]*)\1[[:space:]]*\).*##-[[:space:]]*(.*)/\-\2\t\t: \3/p" < "$0"
+      sed -Ene "s/^[[:space:]]*(['\"])([-[:alnum:]]*)*\1[[:space:]]*\)[[:space:]]*set[[:space:]]*--[[:space:]]*(['\"])[@$]*\3[[:space:]]*(['\"])(-[[:alnum:]])\4.*##-[[:space:]]*(.*)/\2\t\t: \6/p" < "$0"
+    ) | sort --ignore-case
+  )"
 
-  if [ -n "$overview" ] ; then
+  if [ -n "$overview" ]; then
     printf "Overview\n%s\n" "$overview"
   fi
 
-  if [ -n "$usage" ] ; then
+  if [ -n "$usage" ]; then
     printf "\nUsage:\n%s\n" "$usage"
   fi
 }
-
 
 ## @fn confirm_distribution()
 ## @brief determine if we're running the desired OS
@@ -151,15 +154,14 @@ confirm_distribution() {
   os_release_filename="${os_release_filename:-/etc/os-release}"
 
   id="$(get_distribution os_release_filename="${os_release_filename}")"
-  
-  if [[ "${id,,}" =~ ${desired_distribution,,} ]] ; then
+
+  if [[ "${id,,}" =~ ${desired_distribution,,} ]]; then
     return 0
   else
     return 1
   fi
 
-} 
-
+}
 
 ## @fn get_distribution()
 ## @brief get the distribution that's running
@@ -184,7 +186,6 @@ get_distribution() {
   sed -Ene "s/^${os_id_field}[[:space:]]*=[[:space:]]*(.*)/\1/p" "${os_release_filename}"
 }
 
-
 ## @fn get_alpine_release()
 ## @brief determine the Alpine release that's running
 ## @details
@@ -201,7 +202,7 @@ get_distribution() {
 ## @code
 ## echo "This is Alpine '$(get_alpine_release)'."
 ## @endcode
-get_alpine_release() { 
+get_alpine_release() {
 
   local "$@"
 
@@ -209,14 +210,13 @@ get_alpine_release() {
 
   if ! confirm_distribution \
     desired_distribtion="Alpine" \
-    os_release_filename="${os_release_filename}" ; then
+    os_release_filename="${os_release_filename}"; then
     echo "This system is running not running '${desired_distribution}'" 1>&2
     return 1
   fi
 
   sed -Ene 's/^VERSION_ID[[:space:]]*=[[:space:]]*([[:digit:]]+)\.([[:digit:]]+).*/v\1.\2/p' "${os_release_filename}"
 }
-  
 
 ## @fn get_package_version()
 ## @brief given a package name, return the current version
@@ -244,22 +244,21 @@ get_package_version() {
   os_release_filename="${os_release_filename:-/etc/os-release}"
 
   branch="${branch:-$(get_alpine_release os_release_filename="${os_release_filename}")}"
+
   package_name="${package_name?No package name specified}"
   arch="${arch:-$(uname -m)}"
   repo="${repo:-}"
   maintainer="${maintainer:-}"
 
-  if [ -z "$branch" ] ; then
+  if [ -z "$branch" ]; then
     echo "Could not determine Alpine version." 1>&2
     return 1
   fi
 
   url="https://pkgs.alpinelinux.org/packages?name=${package_name}&branch=${branch}&${repo}=&arch=${arch}&maintainer=${maintainer}"
 
-  curl -s "$url" | xmllint --html --xpath '//td[@class="version"]/text()' - 2>/dev/null
+  curl -s "$url" | xmllint --html --xpath '//td[@class="version"]/text()' - 2> /dev/null
 }
-
-
 
 ###
 ### If there is a library directory (lib/) relative to the
@@ -267,17 +266,15 @@ get_package_version() {
 ### the *.bash files located there.
 ###
 
-
 if [ -n "${LIBRARY_PATH}" ] \
-&& [ -d "${LIBRARY_PATH}" ] ; then
-  for library in "${LIBRARY_PATH}"*.bash ; do
-    if [ -e "${library}" ] ; then
+  && [ -d "${LIBRARY_PATH}" ]; then
+  for library in "${LIBRARY_PATH}"*.bash; do
+    if [ -e "${library}" ]; then
       # shellcheck disable=SC1090
       . "${library}"
     fi
   done
 fi
-
 
 ## @fn main()
 ## @brief This is the main program loop.
@@ -289,24 +286,22 @@ main() {
 
   trap die ERR
 
- 
   ###
   ### set values from their defaults here
   ###
 
-
+  branch="${DEFAULT_BRANCH}"
   input_filename="${DEFAULT_INPUT_FILENAME}"
   output_filename="${DEFAULT_OUTPUT_FILENAME}"
-
 
   ###
   ### process long options here
   ###
 
-
-  for arg in "$@" ; do
+  for arg in "$@"; do
     shift
     case "$arg" in
+      '--branch')  set -- "$@" "-b" ;; ##- see -b
       '--help') set -- "$@" "-h" ;;   ##- see -h
       '--input') set -- "$@" "-i" ;;   ##- see -i
       '--output') set -- "$@" "-o" ;;   ##- see -o
@@ -314,48 +309,50 @@ main() {
     esac
   done
 
-
   ###
   ### process short options here
   ###
 
-
   OPTIND=1
-  while getopts "i:o:h" opt ; do
+  while getopts "b:i:o:h" opt; do
     case "$opt" in
-      'i' ) input_filename="$OPTARG" ;;         ##- set the file to read
-      'o' ) output_filename="$OPTARG" ;;        ##- set the file to write
-      'h' ) display_usage ; exit 0 ;; ##- view the help documentation
-      *) printf "Invalid option '%s'" "$opt" 1>&2 ; display_usage 1>&2 ; exit 1 ;;
+      'b')  branch="$OPTARG" ;;                 ##- set the branch
+      'i')  input_filename="$OPTARG" ;;         ##- set the file to read
+      'o')  output_filename="$OPTARG" ;;        ##- set the file to write
+      'h')
+            display_usage
+                            exit 0
+                                   ;; ##- view the help documentation
+      *)
+         printf "Invalid option '%s'" "$opt" 1>&2
+                                                    display_usage 1>&2
+                                                                         exit 1
+                                                                                ;;
     esac
   done
 
   shift "$((OPTIND - 1))"
 
-  
   ###
   ### program logic goes here
   ###
 
   tmpfile="$(mktemp -p "${TMPDIR:-/tmp/}")"
 
-  while read -r package ; do
+  while read -r package; do
     package_name="$(echo "${package}" | sed -Ee 's/[[:space:]=].*//')"
     package_version="$(get_package_version "${package_name}")"
 
-    if [ -n "${package_version}" ] ; then
+    if [ -n "${package_version}" ]; then
       echo "${package_name}=${package_version}" >> "${tmpfile}"
     fi
   done < "${input_filename}"
 
-  if [ -s "$tmpfile" ] ; then
+  if [ -s "$tmpfile" ]; then
     mv -f "${tmpfile}" "${output_filename}"
   fi
 
 }
 
-
 # if we're not being sourced and there's a function named `main`, run it
 [[ "$0" == "${BASH_SOURCE[0]}" ]] && [ "$(type -t "main")" = "function" ] && main "$@"
-
-
