@@ -27,11 +27,11 @@ If the `branch` isn't provided (as an environment variable), then the
 script will attempt to determine the release of Alpine that's running.
 
 The script doesn't need to be run from Alpine Linux.. if the Alpine
-release is provded via the `branch` environment variable.  So, this
+release is provded via the `--branch` or `-b` flag.  So, this
 will run from a system running Ubuntu:
 
 ```bash
-branch=v3.17 ./alpine_package_pinner.bash
+./alpine_package_pinner.bash --branch=v3.17
 ```
 
 ### Determining Package Versions
