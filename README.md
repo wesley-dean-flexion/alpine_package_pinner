@@ -18,7 +18,7 @@ while the output won't be written to the filename until the entire
 input has been read.  So, this works:
 
 ```bash
-./alpine_package_pinner.bash --input apk.txt --output apk.txt
+./alpine_package_pinner.bash -i apk.txt -o apk.txt
 ```
 
 ### Running on non-Alpine
@@ -31,7 +31,7 @@ release is provded via the `--branch` or `-b` flag.  So, this
 will run from a system running Ubuntu:
 
 ```bash
-./alpine_package_pinner.bash --branch=v3.17
+./alpine_package_pinner.bash -b v3.17
 ```
 
 ### Determining Package Versions
