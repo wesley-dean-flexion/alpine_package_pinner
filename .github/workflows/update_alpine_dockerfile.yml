@@ -1,0 +1,35 @@
+---
+name: Update Alpine Dockerfile
+
+# yamllint disable-line rule:truthy
+on:
+  workflow_dispatch:
+  pull_request:
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  build:
+    name: Update Dockerfile
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get install -fy bash curl libxml2-utils
+
+      - name: Perform Update
+        run: ./alpine_package_finder.bash -i apk.txt -o apk-lock.txt -b "$(sed -Ene 's/[[:space:]]*from[[:space:]]*alpine:([[:digit:]]*.[[:digit:]]*).*/v\1/Ip' < Dockerfile)"
+
+      - name: Create commit with changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
+          commit_message: "[Pin Package Files]"
