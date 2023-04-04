@@ -243,9 +243,7 @@ get_package_version() {
 
   os_release_filename="${os_release_filename:-/etc/os-release}"
 
-
   branch="$(validate_branch_name branch="${branch}" os_release_filename="${os_release_filename}")"
-
 
   package_name="${package_name?No package name specified}"
   arch="${arch:-$(uname -m)}"
@@ -261,8 +259,6 @@ get_package_version() {
 
   curl -s "$url" | xmllint --html --xpath '//td[@class="version"]/text()' - 2> /dev/null
 }
-
-
 
 ## @fn validate_branch_name()
 ## @brief make sure the branch name starts with 'v' if needed
@@ -292,10 +288,9 @@ validate_branch_name() {
 
   os_release_filename="${os_release_filename:-/etc/os-release}"
 
-
   branch="${branch:-$(get_alpine_release os_release_filename="${os_release_filename}")}"
 
-  if [[ $branch =~ ^[[:digit:]] ]] ; then
+  if [[ $branch =~ ^[[:digit:]] ]]; then
     branch="v${branch}"
   fi
 
