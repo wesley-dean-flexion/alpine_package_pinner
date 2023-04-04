@@ -378,7 +378,11 @@ main() {
 
   while read -r package; do
     package_name="$(echo "${package}" | sed -Ee 's/[[:space:]=].*//')"
-    package_version="$(get_package_version "${package_name}")"
+
+    printf "%s ... " "$package_name" 1>&2
+    package_version="$(get_package_version package_name="${package_name}" branch="${branch}")"
+
+    printf "%s\n" "$package_version" 1>&2
 
     if [ -n "${package_version}" ]; then
       echo "${package_name}=${package_version}" >> "${tmpfile}"

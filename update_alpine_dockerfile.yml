@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: apt-get install -fy xmllint curl
+        run: apt-get install -fy bash curl libxml2-utils
 
       - name: Perform Update
         run: ./alpine_package_finder.bash -i apk.txt -o apk-lock.txt -b "$(sed -Ene 's/[[:space:]]*from[[:space:]]*alpine:([[:digit:]]*.[[:digit:]]*).*/v\1/Ip' < Dockerfile)"
