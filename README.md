@@ -36,6 +36,15 @@ running Ubuntu:
 ./alpine_package_pinner.bash -b v3.17
 ```
 
+### Running in Docker
+
+A pre-built image is available on DockerHub and GHCR for x86\_64 and
+amd64 architectures.  The following will run it locally:
+
+```bash
+docker run --rm -it -w "$PWD" -v "$PWD:$PWD" -u "$UID" docker.io/wesleydeanflexion/alpine_package_pinner -i apk.txt -o apk-lock.txt -b v3.17
+```
+
 ### Determining Package Versions
 
 The Alpine website is queried and `xmllint` is used to parse out
