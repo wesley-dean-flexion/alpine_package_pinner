@@ -239,11 +239,11 @@ get_alpine_release() {
 ## @endcode
 get_package_version() {
 
-  local "$*"
+  local "$@"
 
   os_release_filename="${os_release_filename:-/etc/os-release}"
 
-  branch="${branch:-$(get_alpine_release os_release_filename="${os_release_filename}")}"
+  branch="$(validate_branch_name branch="${branch}" os_release_filename="${os_release_filename}")"
 
   package_name="${package_name?No package name specified}"
   arch="${arch:-$(uname -m)}"
@@ -258,6 +258,43 @@ get_package_version() {
   url="https://pkgs.alpinelinux.org/packages?name=${package_name}&branch=${branch}&${repo}=&arch=${arch}&maintainer=${maintainer}"
 
   curl -s "$url" | xmllint --html --xpath '//td[@class="version"]/text()' - 2> /dev/null
+}
+
+## @fn validate_branch_name()
+## @brief make sure the branch name starts with 'v' if needed
+## @details
+## The API looks for branch names like 'v3.17' or 'edge', so passing a
+## branch named "3.17" (as how it looks in a Dockerfile) looks like it
+## would work, but it doesn't -- it results in a URL that returns a 404
+## from the API which causes `curl -s` to fail silently which is a PITA
+## to track down.  Also, we can't blindly put a 'v' in front of every
+## branch name because 'edge' is a legitimate branch name we many need
+## to query.  Therefore, if the branch name starts with a digit, we'll
+## prepend a 'v' to it; otherwise, we leave it alone.  Also, if we get
+## no branch name, we'll attempt to find it.
+##
+## The validated branch name is returned via STDOUT.
+## @param branch the name of the branch to check
+## @param os_release_filename the file to query (default is /etc/os-release)
+## @retval 0 (True) if we could return something
+## @retval 1 (False) if something went wrong
+## @par Example
+## @code
+## branch="$(validate_branch_name "${branch}")"
+## @endcode
+validate_branch_name() {
+
+  local "$@"
+
+  os_release_filename="${os_release_filename:-/etc/os-release}"
+
+  branch="${branch:-$(get_alpine_release os_release_filename="${os_release_filename}")}"
+
+  if [[ $branch =~ ^[[:digit:]] ]]; then
+    branch="v${branch}"
+  fi
+
+  echo "${branch}"
 }
 
 ###
