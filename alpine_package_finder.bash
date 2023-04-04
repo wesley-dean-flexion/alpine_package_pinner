@@ -376,6 +376,8 @@ main() {
 
   tmpfile="$(mktemp -p "${TMPDIR:-/tmp/}")"
 
+  echo "tmpfile = '$tmpfile'" 1>&2
+
   while read -r package; do
     package_name="$(echo "${package}" | sed -Ee 's/[[:space:]=].*//')"
 
@@ -391,6 +393,8 @@ main() {
 
   if [ -s "$tmpfile" ]; then
     mv -f "${tmpfile}" "${output_filename}"
+  else
+    rm -f "${tmpfile}"
   fi
 
 }
