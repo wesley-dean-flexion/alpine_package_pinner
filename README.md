@@ -1,5 +1,7 @@
 # alpine\_package\_pinner
 
+[![MegaLinter](https://github.com/wesley-dean-flexion/alpine_package_pinner/actions/workflows/megalinter.yml/badge.svg)](https://github.com/wesley-dean-flexion/alpine_package_pinner/actions/workflows/megalinter.yml)
+
 This will consume a text file containing a list of Alpine packages
 and write a versioned list to a "lock" file that `apk` can use to
 install packages.
