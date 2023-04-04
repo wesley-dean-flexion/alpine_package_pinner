@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Perform Update
-        run: docker run --rm -it -w "$PWD" -v "$PWD:$PWD" -u "$UID" ghcr.io/wesley-dean-flexion/alpine_package_pinner:latest -i apk.txt -o apk-lock.txt -b "$(sed -Ene 's/[[:space:]]*from[[:space:]]*alpine:([[:digit:]]*.[[:digit:]]*).*/v\1/Ip' < Dockerfile)"
+        run: docker run --rm -i -w "$PWD" -v "$PWD:$PWD" -u "$UID" ghcr.io/wesley-dean-flexion/alpine_package_pinner:latest -i apk.txt -o apk-lock.txt -b "$(sed -Ene 's/[[:space:]]*from[[:space:]]*alpine:([[:digit:]]*.[[:digit:]]*).*/v\1/Ip' < Dockerfile)"
 
       - name: Create commit with changes
         uses: stefanzweifel/git-auto-commit-action@v4
