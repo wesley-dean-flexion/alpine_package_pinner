@@ -61,4 +61,4 @@ From there, one may call the package pinner then add and commit the
 updated `apk-lock.txt` file.
 
 There is a sample GitHub Action showing out this could work at
-[update_alpine_dockerfile.yml](./update_alpine_dockerfile.yml) .
+[update_alpine_dockerfile.yml](./.github/workflows/update_alpine_dockerfile.yml) .
