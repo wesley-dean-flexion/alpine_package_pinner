@@ -58,3 +58,4 @@ jobs:
           image: ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}:latest
           registry-username: ${{ secrets.GHCR_USERNAME }}
           registry-password: ${{ secrets.GHCR_PAT }}
+          artifact-name: sbom.spdx
