@@ -51,3 +51,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+
+
+      - name: update SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}:latest
+          registry-username: ${{ secrets.GHCR_USERNAME }}
+          registry-password: ${{ secrets.GHCR_PAT }}
