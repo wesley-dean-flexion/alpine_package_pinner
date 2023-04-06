@@ -1,6 +1,7 @@
 FROM alpine:3.17.3
 
 ENV RUNNER="runner"
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 COPY apk.txt /
 RUN tr '\n' '\0' < apk.txt | xargs -0 apk add --no-cache  \
