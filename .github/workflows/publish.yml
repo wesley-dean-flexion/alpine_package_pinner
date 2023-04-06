@@ -52,7 +52,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PAT }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
 
-
       - name: update SBOM
         uses: anchore/sbom-action@v0
         with:
